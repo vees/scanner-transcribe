@@ -60,6 +60,32 @@ def transcribe_file(speech_file):
     # [END migration_sync_response]
 # [END def_transcribe_file]
 
+# [START def_transcribe_file]
+def transcribe_file_ret(speech_file):
+    """Transcribe the given audio file."""
+    from google.cloud import speech
+    from google.cloud.speech import enums
+    from google.cloud.speech import types
+    client = speech.SpeechClient()
+
+    # [START migration_sync_request]
+    # [START migration_audio_config_file]
+    with io.open(speech_file, 'rb') as audio_file:
+        content = audio_file.read()
+
+    audio = types.RecognitionAudio(content=content)
+    config = types.RecognitionConfig(
+        encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=8000,
+        language_code='en-US')
+    # [END migration_audio_config_file]
+
+    # [START migration_sync_response]
+    response = client.recognize(config, audio)
+    # [END migration_sync_request]
+    # Each result is for a consecutive portion of the audio. Iterate through
+    # them to get the transcripts for the entire audio file.
+    return(response)
 
 # [START def_transcribe_gcs]
 def transcribe_gcs(gcs_uri):
@@ -96,4 +122,7 @@ if __name__ == '__main__':
     if args.path.startswith('gs://'):
         transcribe_gcs(args.path)
     else:
-        transcribe_file(args.path)
+        r = transcribe_file_ret(args.path)
+        import recognize_to_json
+        print(recognize_to_json.to_json(r, args.path))
+        recognize_to_json.postup(r, args.path)

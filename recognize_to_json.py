@@ -27,14 +27,14 @@ Out[48]: str
 
 """
 
-def to_json(g):
+def to_json(g, speech_file):
     from google.cloud.speech_v1 import types
     import json
     import os
     from datetime import datetime
     if not isinstance(g,types.RecognizeResponse):
         return {}
-    file='/home/rob/scanner/scanner-2018-06-17-20-51-06.wav'
+    file=speech_file
     base=os.path.basename(file)
     begintime=datetime.strptime(base,"scanner-%Y-%m-%d-%H-%M-%S.wav").isoformat()
     a=[]
@@ -43,10 +43,15 @@ def to_json(g):
         i+=1
         if len(result.alternatives)>0:
             alt=result.alternatives[0]
-           
+
             a.append({'recordtime': begintime,
                       'sequence': i,
-                      'transcript': alt.transcript, 
+                      'transcript': alt.transcript,
                       'confidence': alt.confidence})
-    
+
     return json.dumps(a)
+
+def postup(g, speech_file):
+    import requests
+    requests.post("https://vees.net/scanner/save",
+        to_json(g, speech_file))
