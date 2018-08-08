@@ -59,6 +59,17 @@ because every write from `arecord` triggers an event. The watchdog module
 also has an issue where the inotify watch limit can be reached with a large
 number of files.
 
+A good place to store these is a tmpfs RAM drive instead of physical media.
+
+		sudo mkdir -p /media/ramdisk
+		sudo mount -t tmpfs -o size=128M tmpfs /media/ramdisk
+
+and then to clean up after the process:
+
+	find /media/ramdisk -type f -name 'scanner*wav'|sort -r|tail -n +11|xargs rm -f
+
+
+
 In order to not send duplicate files to Google Transcription service the
 script must be aware of files that it has already sent. Several possible methods
 to achieve this are:
@@ -70,6 +81,8 @@ to achieve this are:
 These can be stored in either a local database or a simpler file structure for temporary use.
 
 # Setup of this Project
+
+https://cloud.google.com/sdk/docs/quickstart-debian-ubuntu
 
     pip freeze > requirements.txt
     pip install -r requirements.txt
